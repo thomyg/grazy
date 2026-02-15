@@ -1,0 +1,35 @@
+{
+  "name": "grazy",
+  "version": "1.0.0",
+  "description": "grazy - Your Grazer Command Line Companion 🧡🚇",
+  "main": "src/index.js",
+  "bin": {
+    "grazy": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "echo \"No tests yet\" && exit 0",
+    "prepublishOnly": "echo \"Run npm publish instead!\""
+  },
+  "keywords": [
+    "graz",
+    "austria",
+    "oeffi",
+    "public-transport",
+    "efa",
+    "verbundlinie",
+    "tram",
+    "bus",
+    "cli",
+    "steiermark"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "commander": "^12.0.0",
+    "chalk": "^4.1.2"
+  }
+}
