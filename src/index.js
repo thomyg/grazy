@@ -3,13 +3,15 @@
 const { Command } = require('commander');
 const chalk = require('chalk');
 const { departuresCmd, searchCmd, routeCmd, statusCmd } = require('./commands');
+const { weatherCmd } = require('./commands/weather');
+const { eventsCmd } = require('./commands/events');
 
 const program = new Command();
 
 program
   .name('grazy')
   .description('grazy - Your Grazer Command Line Companion 🧡🚇')
-  .version('0.1.0');
+  .version('0.3.0');
 
 // Search
 program
@@ -39,15 +41,22 @@ program
   .option('-c, --changes <n>', 'Max transfers', '5')
   .action(routeCmd);
 
-// Stadium
+// Weather
 program
-  .command('stadium')
-  .description('Get directions to Merkur Arena (Stadion)')
-  .option('-f, --from <place>', 'Start location', 'Hauptbahnhof')
-  .action(async (options) => {
-    const { from } = options;
-    await routeCmd(from, 'Stadion', { departure: true });
-  });
+  .command('weather')
+  .alias('w')
+  .description('Get current weather in Graz')
+  .option('-d, --days <n>', 'Forecast days (1-7)', '3')
+  .action(weatherCmd);
+
+// Events
+program
+  .command('events')
+  .alias('e')
+  .description('Get upcoming events in Graz')
+  .option('-c, --category <cat>', 'Filter by category (all, concert, theater, exhibition, market, sports, kids)')
+  .option('-l, --limit <n>', 'Number of events', '10')
+  .action(eventsCmd);
 
 // Status
 program
@@ -58,35 +67,29 @@ program
 // Help
 program
   .command('help')
-  .description('Show helpful tips for the Assistant')
+  .description('Show helpful tips')
   .action(() => {
     console.log(chalk.bold('\n📖 grazy - Help\n'));
     
-    console.log(chalk.cyan('Commands:'));
+    console.log(chalk.cyan('🚇 Transport:'));
     console.log('  grazy search <name>        Find a stop');
     console.log('  grazy departures <stop>    Next departures');
-    console.log('  grazy route <from> <to>    Find route');
-    console.log('  grazy stadium               Directions to stadium');
-    console.log('  grazy status               API status\n');
+    console.log('  grazy route <from> <to>    Find route\n');
+    
+    console.log(chalk.cyan('🌤️  Weather & Events:'));
+    console.log('  grazy weather              Current weather');
+    console.log('  grazy weather --days 7     7-day forecast');
+    console.log('  grazy events               Upcoming events\n');
     
     console.log(chalk.cyan('Options:'));
-    console.log('  -l, --limit <n>     Number of departures');
+    console.log('  -l, --limit <n>     Number of results');
     console.log('  -L, --line <nr>     Filter by line');
-    console.log('  -r, --direction     Filter by direction');
     console.log('  -t, --type          tram or bus\n');
     
     console.log(chalk.cyan('Examples:'));
     console.log('  grazy departures "FH Joanneum"');
-    console.log('  grazy search "Stadion"');
-    console.log('  grazy route "Hauptbahnhof" "Stadion"');
-    console.log('  grazy departures "Stadion" --line 7');
-    console.log();
-    
-    console.log(chalk.cyan('Known Stops:'));
-    console.log('  63207960  FH Joanneum');
-    console.log('  63203198  Stadion Münzgrabenstraße');
-    console.log('  63203023  Stadion Liebenau');
-    console.log('  63203040  Graz Hauptbahnhof');
+    console.log('  grazy weather');
+    console.log('  grazy events --category concert');
     console.log();
   });
 
