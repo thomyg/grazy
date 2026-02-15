@@ -16,7 +16,16 @@ async function searchStops(name) {
   const res = await fetch(url);
   const data = await res.json();
   
-  const points = data?.dm?.itdOdvAssignedStops || [];
+  let points = data?.dm?.itdOdvAssignedStops || [];
+  
+  // If no results, try with expanded search (mode: indirect)
+  if (points.length === 0) {
+    const altUrl = `${BASE_URL}/XML_DM_REQUEST?outputFormat=JSON&type_dm=stop&name_dm=${encodeURIComponent(name)}&mode=indirect&language=de`;
+    const altRes = await fetch(altUrl);
+    const altData = await altRes.json();
+    points = altData?.dm?.itdOdvAssignedStops || [];
+  }
+  
   return points.map(p => ({
     id: p.stopID,
     name: p.nameWithPlace || p.name,
