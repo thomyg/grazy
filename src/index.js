@@ -9,83 +9,84 @@ const program = new Command();
 program
   .name('grazy')
   .description('grazy - Your Grazer Command Line Companion 🧡🚇')
-  .version('1.0.0');
+  .version('0.1.0');
 
-// Suchen
+// Search
 program
-  .command('suche <name>')
-  .description('Haltestelle nach Namen suchen')
+  .command('search <name>')
+  .alias('s')
+  .description('Search for stops by name')
   .action(searchCmd);
 
-// Abfahrten
+// Departures
 program
-  .command('abfahrt <stopp>')
-  .alias('ab')
-  .description('Echtzeit-Abfahrten an einer Haltestelle')
-  .option('-l, --limit <n>', 'Anzahl der Abfahrten', '10')
-  .option('-L, --linie <nr>', 'Nach Linie filtern')
-  .option('-r, --richtung <text>', 'Nach Richtung filtern')
-  .option('-t, --type <tram|bus>', 'Nach Verkehrsmittel filtern')
+  .command('departures <stop>')
+  .alias('dep')
+  .description('Real-time departures at a stop')
+  .option('-l, --limit <n>', 'Number of departures', '10')
+  .option('-L, --line <nr>', 'Filter by line number')
+  .option('-r, --direction <text>', 'Filter by direction')
+  .option('-t, --type <tram|bus>', 'Filter by transport type')
   .action(departuresCmd);
 
 // Route
 program
-  .command('route <von> <nach>')
+  .command('route <from> <to>')
   .alias('r')
-  .description('Verbindung von A nach B suchen')
-  .option('-a, --arrival', 'Ankunftszeit angeben statt Abfahrtszeit')
-  .option('-d, --departure', 'Abfahrtszeit angeben (Standard)', { default: true })
-  .option('-c, --changes <n>', 'Max. Umstiege', '5')
+  .description('Find route from A to B')
+  .option('-a, --arrival', 'Specify arrival time instead of departure')
+  .option('-d, --departure', 'Specify departure time (default)', { default: true })
+  .option('-c, --changes <n>', 'Max transfers', '5')
   .action(routeCmd);
 
-// Stadion (Beispiel für preset)
+// Stadium
 program
-  .command('stadion')
-  .description('Verbindung zum Stadion (Merkur Arena)')
-  .option('-v, --von <ort>', 'Startort', 'Hauptbahnhof')
+  .command('stadium')
+  .description('Get directions to Merkur Arena (Stadion)')
+  .option('-f, --from <place>', 'Start location', 'Hauptbahnhof')
   .action(async (options) => {
-    const { von } = options;
-    await routeCmd(von, 'Stadion Graz', { departure: true });
+    const { from } = options;
+    await routeCmd(from, 'Stadion', { departure: true });
   });
 
 // Status
 program
   .command('status')
-  .description('API-Status prüfen')
+  .description('Check API status')
   .action(statusCmd);
 
-// Hilfe-Tipps für mich
+// Help
 program
-  .command('hilfe')
-  .description('Zeigt hilfreiche Tipps für den Assistant')
+  .command('help')
+  .description('Show helpful tips for the Assistant')
   .action(() => {
-    console.log(chalk.bold('\n📖 Graz Öffi CLI - Hilfe\n'));
+    console.log(chalk.bold('\n📖 grazy - Help\n'));
     
-    console.log(chalk.cyan('Befehle:'));
-    console.log('  grazoeffi suche <name>     Haltestelle finden');
-    console.log('  grazoeffi abfahrt <stopp>  Nächste Abfahrten');
-    console.log('  grazoeffi route <von> <nach>  Route suchen');
-    console.log('  grazoeffi stadion          Zum Stadion');
-    console.log('  grazoeffi status           API-Status\n');
+    console.log(chalk.cyan('Commands:'));
+    console.log('  grazy search <name>        Find a stop');
+    console.log('  grazy departures <stop>    Next departures');
+    console.log('  grazy route <from> <to>    Find route');
+    console.log('  grazy stadium               Directions to stadium');
+    console.log('  grazy status               API status\n');
     
-    console.log(chalk.cyan('Optionen:'));
-    console.log('  -l, --limit <n>    Anzahl Abfahrten');
-    console.log('  -L, --linie <nr>   Nur bestimmte Linie');
-    console.log('  -r, --richtung     Nur Richtung filtern');
-    console.log('  -t, --type         tram oder bus\n');
+    console.log(chalk.cyan('Options:'));
+    console.log('  -l, --limit <n>     Number of departures');
+    console.log('  -L, --line <nr>     Filter by line');
+    console.log('  -r, --direction     Filter by direction');
+    console.log('  -t, --type          tram or bus\n');
     
-    console.log(chalk.cyan('Beispiele für Assistant:'));
-    console.log('  "Abfahrt FH Joanneum"');
-    console.log('  "Suche Stadion"');
-    console.log('  "Route Hauptbahnhof zum Stadion"');
-    console.log('  "Linie 7 Abfahrt"');
+    console.log(chalk.cyan('Examples:'));
+    console.log('  grazy departures "FH Joanneum"');
+    console.log('  grazy search "Stadion"');
+    console.log('  grazy route "Hauptbahnhof" "Stadion"');
+    console.log('  grazy departures "Stadion" --line 7');
     console.log();
     
-    console.log(chalk.cyan('Bekannte Haltestellen-IDs:'));
+    console.log(chalk.cyan('Known Stops:'));
     console.log('  63207960  FH Joanneum');
     console.log('  63203198  Stadion Münzgrabenstraße');
     console.log('  63203023  Stadion Liebenau');
-    console.log('  6324001   Graz Hauptbahnhof');
+    console.log('  63203040  Graz Hauptbahnhof');
     console.log();
   });
 

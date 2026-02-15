@@ -2,7 +2,7 @@ const chalk = require('chalk');
 const { searchStops, getDepartures, getRoutes, getStatus } = require('../lib/efa');
 
 /**
- * Befehl: Abfahrten an Haltestelle
+ * Command: Departures at a stop
  */
 async function departuresCmd(stop, options) {
   try {
@@ -14,11 +14,11 @@ async function departuresCmd(stop, options) {
     });
     
     if (deps.length === 0) {
-      console.log(chalk.yellow('Keine Abfahrten gefunden.'));
+      console.log(chalk.yellow('No departures found.'));
       return;
     }
     
-    console.log(chalk.bold(`\n🚌 Abfahrten ab "${stop}":\n`));
+    console.log(chalk.bold(`\n🚌 Departures from "${stop}":\n`));
     console.log(chalk.gray('─'.repeat(60)));
     
     for (const d of deps) {
@@ -40,24 +40,24 @@ async function departuresCmd(stop, options) {
     console.log(chalk.gray('─'.repeat(60)));
     
   } catch (err) {
-    console.error(chalk.red(`Fehler: ${err.message}`));
+    console.error(chalk.red(`Error: ${err.message}`));
     process.exit(1);
   }
 }
 
 /**
- * Befehl: Haltestelle suchen
+ * Command: Search for stops
  */
 async function searchCmd(name, options) {
   try {
     const stops = await searchStops(name);
     
     if (stops.length === 0) {
-      console.log(chalk.yellow('Keine Haltestellen gefunden.'));
+      console.log(chalk.yellow('No stops found.'));
       return;
     }
     
-    console.log(chalk.bold(`\n🔍 Suchergebnisse für "${name}":\n`));
+    console.log(chalk.bold(`\n🔍 Search results for "${name}":\n`));
     
     for (const s of stops) {
       const dist = s.distance ? chalk.gray(`(${s.distance}m)`) : '';
@@ -65,13 +65,13 @@ async function searchCmd(name, options) {
     }
     
   } catch (err) {
-    console.error(chalk.red(`Fehler: ${err.message}`));
+    console.error(chalk.red(`Error: ${err.message}`));
     process.exit(1);
   }
 }
 
 /**
- * Befehl: Route suchen
+ * Command: Find route
  */
 async function routeCmd(from, to, options) {
   try {
@@ -82,7 +82,7 @@ async function routeCmd(from, to, options) {
     });
     
     if (routes.length === 0) {
-      console.log(chalk.yellow('Keine Verbindungen gefunden.'));
+      console.log(chalk.yellow('No routes found.'));
       return;
     }
     
@@ -91,7 +91,7 @@ async function routeCmd(from, to, options) {
     for (let i = 0; i < routes.length; i++) {
       const r = routes[i];
       console.log(chalk.gray('─'.repeat(50)));
-      console.log(chalk.bold(`Option ${i + 1}: ${r.departure} → ${r.arrival} (${r.duration}) ${chalk.gray(`(${r.changes} Umstieg${r.changes !== 1 ? 'e' : ''})`)}`));
+      console.log(chalk.bold(`Option ${i + 1}: ${r.departure} → ${r.arrival} (${r.duration}) ${chalk.gray(`(${r.changes} change${r.changes !== 1 ? 's' : ''})`)}`));
       
       for (const leg of r.legs) {
         if (!leg.line) continue;
@@ -107,23 +107,23 @@ async function routeCmd(from, to, options) {
     }
     
   } catch (err) {
-    console.error(chalk.red(`Fehler: ${err.message}`));
+    console.error(chalk.red(`Error: ${err.message}`));
     process.exit(1);
   }
 }
 
 /**
- * Befehl: Status
+ * Command: Status
  */
 async function statusCmd() {
   try {
     const status = await getStatus();
-    console.log(chalk.bold('\n📡 Graz Öffi API Status\n'));
-    console.log(`  Server-Zeit: ${chalk.white(status.serverTime)}`);
+    console.log(chalk.bold('\n📡 grazy API Status\n'));
+    console.log(`  Server Time: ${chalk.white(status.serverTime)}`);
     console.log(`  API:         ${chalk.green(status.api)}`);
     console.log();
   } catch (err) {
-    console.error(chalk.red(`Fehler: ${err.message}`));
+    console.error(chalk.red(`Error: ${err.message}`));
   }
 }
 
