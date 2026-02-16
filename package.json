@@ -1,6 +1,6 @@
 {
   "name": "@grazy/cli",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "grazy - Your Grazer Command Line Companion 🧡🚇",
   "main": "src/index.js",
   "bin": {
@@ -8,7 +8,8 @@
   },
   "scripts": {
     "start": "node src/index.js",
-    "test": "echo \"No tests yet\" && exit 0",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "prepublishOnly": "echo \"Run npm publish instead!\""
   },
   "keywords": [
@@ -30,11 +31,14 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "commander": "^12.0.0",
-    "chalk": "^4.1.2"
+    "chalk": "^4.1.2",
+    "commander": "^12.0.0"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thomyg/grazy.git"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0"
   }
 }
