@@ -1,5 +1,5 @@
 const chalk = require('chalk');
-const { searchPOIs, searchNearPOIs, POI_TYPES } = require('../lib/poi');
+const { searchPOIs, searchNearAddress, POI_TYPES } = require('../lib/poi');
 
 /**
  * Command: POI Search
@@ -7,6 +7,8 @@ const { searchPOIs, searchNearPOIs, POI_TYPES } = require('../lib/poi');
 async function poiCmd(type, options) {
   try {
     const limit = parseInt(options.limit) || 10;
+    const near = options.near;
+    const radius = parseInt(options.radius) || 1000;
     
     // Show available types if no type given
     if (!type || type === 'help') {
@@ -19,24 +21,41 @@ async function poiCmd(type, options) {
         console.log(row);
       }
       console.log(chalk.gray('\nExample: grazy poi restaurant'));
+      console.log(chalk.gray('Example: grazy poi cafe --near "Jakominiplatz" --radius 500'));
       console.log();
       return;
     }
     
-    // Search
-    const pois = await searchPOIs(type, { limit });
+    let pois, locationInfo;
+    
+    if (near) {
+      // Search near address
+      const result = await searchNearAddress(near, type, { limit, radius });
+      pois = result.pois;
+      locationInfo = result.location;
+    } else {
+      // Search all in Graz
+      pois = await searchPOIs(type, { limit });
+    }
     
     if (pois.length === 0) {
-      console.log(chalk.yellow(`\n🔍 No ${type} found in Graz.\n`));
+      console.log(chalk.yellow(`\n🔍 No ${type} found${near ? ` near ${near}` : ' in Graz'}.\n`));
       return;
     }
     
     const poiType = POI_TYPES[type.toLowerCase()];
-    console.log(chalk.bold(`\n🔍 ${poiType?.label || type} in Graz\n`));
+    
+    // Show location info if searching near address
+    if (locationInfo) {
+      console.log(chalk.bold(`\n📍 Near: ${locationInfo.address}\n`));
+    }
+    
+    console.log(chalk.bold(`🔍 ${poiType?.label || type}${near ? ' near you' : ' in Graz'}\n`));
     console.log(chalk.gray('─'.repeat(60)));
     
     for (const poi of pois) {
-      console.log(chalk.cyan('📍') + ' ' + chalk.bold(poi.name));
+      const distStr = poi.distance ? chalk.cyan(`${poi.distance}m`) : '';
+      console.log(chalk.cyan('📍') + ' ' + chalk.bold(poi.name) + (distStr ? ' ' + chalk.gray(`(${distStr})`) : ''));
       if (poi.address) {
         console.log('   ' + chalk.gray(poi.address));
       }
@@ -49,7 +68,7 @@ async function poiCmd(type, options) {
     }
     
     console.log(chalk.gray('─'.repeat(60)));
-    console.log(chalk.gray(`Found ${pois.length} results`));
+    console.log(chalk.gray(`Found ${pois.length} results${near ? ` within ${radius}m` : ''}`));
     console.log();
     
   } catch (err) {

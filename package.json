@@ -1,6 +1,6 @@
 {
   "name": "@grazy/cli",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "grazy - Your Grazer Command Line Companion 🧡🚇",
   "main": "src/index.js",
   "bin": {

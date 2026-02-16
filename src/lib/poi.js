@@ -4,6 +4,7 @@
  */
 
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
+const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 
 const POI_TYPES = {
   restaurant: {
@@ -104,7 +105,33 @@ const POI_TYPES = {
 };
 
 /**
- * Search POIs in Graz
+ * Geocode an address to coordinates
+ */
+async function geocodeAddress(address) {
+  const url = new URL(NOMINATIM_URL);
+  url.searchParams.set('q', `${address}, Graz, Austria`);
+  url.searchParams.set('format', 'json');
+  url.searchParams.set('limit', '1');
+  
+  const res = await fetch(url.toString(), {
+    headers: { 'User-Agent': 'grazy CLI' }
+  });
+  
+  const data = await res.json();
+  
+  if (!data || data.length === 0) {
+    throw new Error(`Address not found: ${address}`);
+  }
+  
+  return {
+    lat: parseFloat(data[0].lat),
+    lon: parseFloat(data[0].lon),
+    display_name: data[0].display_name
+  };
+}
+
+/**
+ * Search POIs in Graz (all)
  */
 async function searchPOIs(type, options = {}) {
   const { limit = 10, radius = 2000 } = options;
@@ -148,10 +175,13 @@ async function searchPOIs(type, options = {}) {
 }
 
 /**
- * Search POIs near a location
+ * Search POIs near an address
  */
-async function searchNearPOIs(lat, lon, type, options = {}) {
+async function searchNearAddress(address, type, options = {}) {
   const { limit = 10, radius = 1000 } = options;
+  
+  // First geocode the address
+  const location = await geocodeAddress(address);
   
   const poiType = POI_TYPES[type.toLowerCase()];
   if (!poiType) {
@@ -161,8 +191,8 @@ async function searchNearPOIs(lat, lon, type, options = {}) {
   const query = `
     [out:json][timeout:25];
     (
-      node["amenity"="${poiType.amenity}"](around:${radius},${lat},${lon});
-      way["amenity"="${poiType.amenity}"](around:${radius},${lat},${lon});
+      node["amenity"="${poiType.amenity}"](around:${radius},${location.lat},${location.lon});
+      way["amenity"="${poiType.amenity}"](around:${radius},${location.lat},${location.lon});
     );
     out center ${limit};
   `;
@@ -181,13 +211,22 @@ async function searchNearPOIs(lat, lon, type, options = {}) {
     type: poiType.label,
     lat: el.lat || el.center?.lat,
     lon: el.lon || el.center?.lon,
-    distance: calculateDistance(lat, lon, el.lat || el.center?.lat, el.lon || el.center?.lon)
+    distance: calculateDistance(location.lat, location.lon, el.lat || el.center?.lat, el.lon || el.center?.lon),
+    address: formatAddress(el.tags),
+    additional: formatAdditional(el.tags)
   }));
   
   // Sort by distance
   pois.sort((a, b) => a.distance - b.distance);
   
-  return pois;
+  return {
+    pois,
+    location: {
+      address: location.display_name,
+      lat: location.lat,
+      lon: location.lon
+    }
+  };
 }
 
 function formatAddress(tags) {
@@ -220,6 +259,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 module.exports = {
   searchPOIs,
-  searchNearPOIs,
+  searchNearAddress,
+  geocodeAddress,
   POI_TYPES
 };

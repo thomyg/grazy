@@ -14,7 +14,7 @@ const program = new Command();
 program
   .name('grazy')
   .description('grazy - Your Grazer Command Line Companion 🧡🚇')
-  .version('0.4.0');
+  .version('0.5.0');
 
 // Search (stops)
 program
@@ -73,15 +73,18 @@ program
   .command('poi <type>')
   .description('Search POIs (restaurants, cafes, bars, etc.)')
   .option('-l, --limit <n>', 'Number of results', '10')
+  .option('-n, --near <address>', 'Search near address (e.g., "Jakominiplatz")')
+  .option('-r, --radius <m>', 'Search radius in meters (default: 1000)', '1000')
   .action(poiCmd);
 
-// Events (placeholder)
+// Events
 program
   .command('events')
   .alias('e')
-  .description('Get upcoming events in Graz (coming soon)')
-  .option('-c, --category <cat>', 'Filter by category')
-  .option('-l, --limit <n>', 'Number of events', '10')
+  .description('Get upcoming events in Graz')
+  .option('-c, --category <cat>', 'Filter by category (musik, theater, ausstellungen, kabarett, kinder, lesungen, fuehrungen, film, hinweise, all)')
+  .option('-w, --when <zeit>', 'Filter by time (heute, morgen, woche, wochenende, monat)')
+  .option('-l, --limit <n>', 'Number of events', '15')
   .action(eventsCmd);
 
 // Status
@@ -111,19 +114,32 @@ program
     console.log('  grazy news --source orf   ORF only\n');
     
     console.log(chalk.cyan('🔍 POI Search:'));
-    console.log('  grazy poi <type>          Search places');
+    console.log('  grazy poi <type>          Search places in Graz');
+    console.log('  grazy poi <type> --near "ADDRESS"  Search near address');
     console.log('  grazy poi help            Show types\n');
+    
+    console.log(chalk.cyan('📅 Events:'));
+    console.log('  grazy events              Alle Events');
+    console.log('  grazy events --category musik    Nur Musik');
+    console.log('  grazy events --when heute        Heute');
+    console.log('  grazy events -c theater -w wochenende  Theater am Wochenende\n');
     
     console.log(chalk.cyan('Options:'));
     console.log('  -l, --limit <n>     Number of results');
-    console.log('  -L, --line <nr>     Filter by line\n');
+    console.log('  -n, --near <addr>   Search near address');
+    console.log('  -r, --radius <m>    Search radius (default: 1000m)\n');
     
     console.log(chalk.cyan('Examples:'));
     console.log('  grazy departures "Jakomini"');
     console.log('  grazy weather');
     console.log('  grazy news');
     console.log('  grazy poi restaurant');
-    console.log('  grazy poi cafe');
+    console.log('  grazy poi cafe --near "Eggenberg"');
+    console.log('  grazy poi bar --near "Jakominiplatz" --radius 500');
+    console.log('  grazy events');
+    console.log('  grazy events --category musik');
+    console.log('  grazy events --when heute');
+    console.log('  grazy events -c theater -w wochenende');
     console.log();
   });
 
